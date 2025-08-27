@@ -90,12 +90,15 @@ class Downloader:
 
     # Main function
     def download_page(self, page_number: int):
+        # Status
+        print("Downloading page {}... ".format(page_number), end='', flush=True)
+
         # Path for the page
         page_path = "{}/{}".format(self.download_path, page_number)
 
         # Checking if the page has already been downloaded
         if os.path.exists("{}/html/{}.html".format(page_path, page_number)):
-            print("Page {} already downloaded, skipping...".format(page_number))
+            print("already downloaded, skipping...".format(page_number))
             return
 
         # Creating directory
@@ -106,8 +109,11 @@ class Downloader:
 
         # Failed to download
         if page_response.status_code != 200:
-            print("Failed to download page {} after 5 tries: {}, skipping...".format(page_number, page_response.status_code))
-            return
+            if page_response.status_code == 404:
+                print("page does not exist: {}".format(page_response.status_code))
+            else:
+                print("failed to download page after 5 tries: {}, skipping...".format(page_response.status_code))
+            return page_response.status_code
 
         # Parsing data
         raw = page_response.text
@@ -134,7 +140,7 @@ class Downloader:
                 asset.write_bytes(asset_response.content)
             else:
                 # Failed
-                print("Failed to download {} for page {}, skipping...".format(remote_url, page_number))
+                print("failed to download {} after 5 tries: {}, skipping... ".format(remote_url, asset_response.status_code))
 
         # Creating html file
         page = Path("{}/html/{}.html".format(page_path, page_number))
@@ -149,5 +155,5 @@ class Downloader:
         page.write_text(parsed_raw, encoding="UTF-8")
 
         # Closing session
-        print("Downloaded page {}...".format(page_number))
+        print("DONE!")
         self.session.close()
