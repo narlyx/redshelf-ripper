@@ -4,54 +4,22 @@ import time
 import os
 import requests
 from config import Config
-
-# Loading configuration
-config = Config()
-
-save_dir = "pages/"+config.book_id
-os.makedirs(save_dir, exist_ok=True)
+from downloader import Downloader
 
 # Main function
 def main():
-    # Downloading each page
-    for i in range(config.total_pages):
-        # Function to download and save a page
-        def download_page(page_number: int, strikes=0):
-            # Cache
-            path = "{}/{}.html".format(save_dir, page_number)
+    config = Config()
 
-            # Checking if the page already is downloaded
-            if os.path.exists(path):
-                print("Page {} already downloaded, skipping...".format(page_number))
-                return
+    save_dir = "pages/{}".format(config.book_id)
+    os.makedirs(save_dir, exist_ok=True)
 
-            # Building request
-            url = "https://platform.virdocs.com/spine/{}/{}".format(config.book_id, page_number)
-            cookies = {
-                    "csrftoken": config.csrftoken,
-                    "session_id": config.session_id
-                    }
+    downloader = Downloader(config.book_id, {"csrftoken": config.csrftoken, "session_id": config.session_id}, save_dir) 
 
-            # Fetching page
-            response = requests.get(url, allow_redirects=True, cookies=cookies)
-
-            # Status codes
-            if response.status_code == 200:
-                # Saving page
-                with open(path, "wb") as page:
-                    page.write(response.content)
-                    print("Page {} downloaded sucessfully...".format(page_number))
-            else:
-                # Error
-                if strikes >= 3:
-                    print("Failed to download page after 3 attempts, skipping...")
-                else:
-                    print("Error: code "+str(response.status_code)+", retrying in 5 seconds...")
-                    time.sleep(5)
-                    download_page(page_number, strikes=strikes+1)
-
-        # Downloading each page
-        download_page(i+1)
+    page_index = 0
+    while True:
+        page_index += 1
+        downloader.download_page(page_index)
+    
     print("Finished downloading pages!")
 
 
