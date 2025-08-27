@@ -97,8 +97,8 @@ class Downloader:
         page_path = "{}/{}".format(self.download_path, page_number)
 
         # Checking if the page has already been downloaded
-        if os.path.exists("{}/html/{}.html".format(page_path, page_number)):
-            print("already downloaded, skipping...".format(page_number))
+        if os.path.exists("{}/html/index.html".format(page_path, page_number)):
+            print("already downloaded, skipping...")
             return
 
         # Creating directory
@@ -143,7 +143,7 @@ class Downloader:
                 print("failed to download {} after 5 tries: {}, skipping... ".format(remote_url, asset_response.status_code))
 
         # Creating html file
-        page = Path("{}/html/{}.html".format(page_path, page_number))
+        page = Path("{}/html/index.html".format(page_path, page_number))
         page.parent.mkdir(parents=True, exist_ok=True)
 
         # Replacing links/assets
