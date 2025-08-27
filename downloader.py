@@ -45,7 +45,7 @@ class Downloader:
 
     # Returns the base url within the page's html
     def __get_base_url(self, html: str) -> str:
-        return re.search('<base href="(.*?/(OPS|OEBPS)).*"/>', html).group(1)
+        return re.search('<base href="(.*?/(EPUB|OPS|OEBPS)).*"/>', html).group(1)
 
     # Returns all remote links within the page's html
     def __get_remote_urls(self, html: str) -> list[str]:
